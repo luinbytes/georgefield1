@@ -25,6 +25,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Includes.h" />
+    <ClInclude Include="Memory.h" />
     <ClInclude Include="Obfuscationmgr.h" />
     <ClInclude Include="Offsets.h" />
   </ItemGroup>

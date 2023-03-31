@@ -1,4 +1,4 @@
 #pragma once
-#include "Mymemory.h"
+#include "Memory.h"
 #include "Obfuscationmgr.h"
 #include "Offsets.h"

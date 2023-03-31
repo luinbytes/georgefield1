@@ -1,43 +1,43 @@
 #include "Includes.h"
-uint64_t EncryptedPlayerMgr_GetPlayer(uint64_t ptr, int id)
+uint64_t EncryptedPlayerMgr_GetPlayer(const Memory& mem, uint64_t ptr, int id)
 {
-    uint64_t XorValue1 = rpm->read<uint64_t>(ptr + 0x20) ^ rpm->read<uint64_t>(ptr + 0x8);
-    uint64_t XorValue2 = XorValue1 ^ rpm->read<uint64_t>(ptr + 0x10);
+    uint64_t XorValue1 = mem.Read<uint64_t>(ptr + 0x20) ^ mem.Read<uint64_t>(ptr + 0x8);
+    uint64_t XorValue2 = XorValue1 ^ mem.Read<uint64_t>(ptr + 0x10);
     if (!ValidPointer(XorValue2))
     {
         return 0;
     }
 
-    return XorValue1 ^ rpm->read<uint64_t>(XorValue2 + 0x8 * id);
+    return XorValue1 ^ mem.Read<uint64_t>(XorValue2 + 0x8 * id);
 }
 
-uint64_t GetPlayerById(int id)
+uint64_t GetPlayerById(const Memory& mem, int id)
 {
-    uint64_t pClientGameContext = rpm->read<uint64_t>(Offsets::ClientGameContext);
+    uint64_t pClientGameContext = mem.Read<uint64_t>(Offsets::ClientGameContext);
     if (!ValidPointer(pClientGameContext))
     {
         return 0;
     }
 
-    uint64_t pPlayerManager = rpm->read<uint64_t>(pClientGameContext + 0x68);
+    uint64_t pPlayerManager = mem.Read<uint64_t>(pClientGameContext + 0x68);
     if (!ValidPointer(pPlayerManager))
     {
         return 0;
     }
 
-    uint64_t pObfuscationMgr = rpm->read<uint64_t>(Offsets::ObfuscationMgr);
+    uint64_t pObfuscationMgr = mem.Read<uint64_t>(Offsets::ObfuscationMgr);
     if (!ValidPointer(pObfuscationMgr))
     {
         return 0;
     }
 
-    uint64_t PlayerListXorValue = rpm->read<uint64_t>(pPlayerManager + 0xF8);
-    uint64_t PlayerListKey = PlayerListXorValue ^ rpm->read<uint64_t>(pObfuscationMgr + 0x70);
+    uint64_t PlayerListXorValue = mem.Read<uint64_t>(pPlayerManager + 0xF8);
+    uint64_t PlayerListKey = PlayerListXorValue ^ mem.Read<uint64_t>(pObfuscationMgr + 0x70);
 
-    uint64_t mpBucketArray = rpm->read<uint64_t>(pObfuscationMgr + 0x10);
+    uint64_t mpBucketArray = mem.Read<uint64_t>(pObfuscationMgr + 0x10);
 
 
-    int mnBucketCount = rpm->read<int>(pObfuscationMgr + 0x18);
+    int mnBucketCount = mem.Read<int>(pObfuscationMgr + 0x18);
     if (mnBucketCount == 0)
     {
         return 0;
@@ -45,51 +45,51 @@ uint64_t GetPlayerById(int id)
 
     int startCount = (int)PlayerListKey % mnBucketCount;
 
-    uint64_t mpBucketArray_startCount = rpm->read<uint64_t>(mpBucketArray + (uint64_t)(startCount * 8));
-    uint64_t node_first = rpm->read<uint64_t>(mpBucketArray_startCount);
-    uint64_t node_second = rpm->read<uint64_t>(mpBucketArray_startCount + 0x8);
-    uint64_t node_mpNext = rpm->read<uint64_t>(mpBucketArray_startCount + 0x10);
+    uint64_t mpBucketArray_startCount = mem.Read<uint64_t>(mpBucketArray + (uint64_t)(startCount * 8));
+    uint64_t node_first = mem.Read<uint64_t>(mpBucketArray_startCount);
+    uint64_t node_second = mem.Read<uint64_t>(mpBucketArray_startCount + 0x8);
+    uint64_t node_mpNext = mem.Read<uint64_t>(mpBucketArray_startCount + 0x10);
 
     while (PlayerListKey != node_first)
     {
         mpBucketArray_startCount = node_mpNext;
 
-        node_first = rpm->read<uint64_t>(mpBucketArray_startCount);
-        node_second = rpm->read<uint64_t>(mpBucketArray_startCount + 0x8);
-        node_mpNext = rpm->read<uint64_t>(mpBucketArray_startCount + 0x10);
+        node_first = mem.Read<uint64_t>(mpBucketArray_startCount);
+        node_second = mem.Read<uint64_t>(mpBucketArray_startCount + 0x8);
+        node_mpNext = mem.Read<uint64_t>(mpBucketArray_startCount + 0x10);
     }
 
     uint64_t EncryptedPlayerMgr = node_second;
     return EncryptedPlayerMgr_GetPlayer(EncryptedPlayerMgr, id);
 }
 
-uint64_t GetLocalPlayer(void)
+uint64_t GetLocalPlayer(const Memory& mem)
 {
-    uint64_t pClientGameContext = rpm->read<uint64_t>(Offsets::ClientGameContext);
+    uint64_t pClientGameContext = mem.Read<uint64_t>(Offsets::ClientGameContext);
     if (!ValidPointer(pClientGameContext))
     {
         return 0;
     }
 
-    uint64_t pPlayerManager = rpm->read<uint64_t>(pClientGameContext + 0x68);
+    uint64_t pPlayerManager = mem.Read<uint64_t>(pClientGameContext + 0x68);
     if (!ValidPointer(pPlayerManager))
     {
         return 0;
     }
 
-    uint64_t pObfuscationMgr = rpm->read<uint64_t>(Offsets::ObfuscationMgr);
+    uint64_t pObfuscationMgr = mem.Read<uint64_t>(Offsets::ObfuscationMgr);
     if (!ValidPointer(pObfuscationMgr))
     {
         return 0;
     }
 
-    uint64_t PlayerListXorValue = rpm->read<uint64_t>(pPlayerManager + 0xF8);
-    uint64_t PlayerListKey = PlayerListXorValue ^ rpm->read<uint64_t>(pObfuscationMgr + 0x70);
+    uint64_t PlayerListXorValue = mem.Read<uint64_t>(pPlayerManager + 0xF8);
+    uint64_t PlayerListKey = PlayerListXorValue ^ mem.Read<uint64_t>(pObfuscationMgr + 0x70);
 
-    uint64_t mpBucketArray = rpm->read<uint64_t>(pObfuscationMgr + 0x10);
+    uint64_t mpBucketArray = mem.Read<uint64_t>(pObfuscationMgr + 0x10);
 
 
-    int mnBucketCount = rpm->read<int>(pObfuscationMgr + 0x18);
+    int mnBucketCount = mem.Read<int>(pObfuscationMgr + 0x18);
     if (mnBucketCount == 0)
     {
         return 0;
@@ -97,42 +97,42 @@ uint64_t GetLocalPlayer(void)
 
     int startCount = (int)PlayerListKey % mnBucketCount;
 
-    uint64_t mpBucketArray_startCount = rpm->read<uint64_t>(mpBucketArray + (uint64_t)(startCount * 8));
-    uint64_t node_first = rpm->read<uint64_t>(mpBucketArray_startCount);
-    uint64_t node_second = rpm->read<uint64_t>(mpBucketArray_startCount + 0x8);
-    uint64_t node_mpNext = rpm->read<uint64_t>(mpBucketArray_startCount + 0x10);
+    uint64_t mpBucketArray_startCount = mem.Read<uint64_t>(mpBucketArray + (uint64_t)(startCount * 8));
+    uint64_t node_first = mem.Read<uint64_t>(mpBucketArray_startCount);
+    uint64_t node_second = mem.Read<uint64_t>(mpBucketArray_startCount + 0x8);
+    uint64_t node_mpNext = mem.Read<uint64_t>(mpBucketArray_startCount + 0x10);
 
     while (PlayerListKey != node_first)
     {
         mpBucketArray_startCount = node_mpNext;
 
-        node_first = rpm->read<uint64_t>(mpBucketArray_startCount);
-        node_second = rpm->read<uint64_t>(mpBucketArray_startCount + 0x8);
-        node_mpNext = rpm->read<uint64_t>(mpBucketArray_startCount + 0x10);
+        node_first = mem.Read<uint64_t>(mpBucketArray_startCount);
+        node_second = mem.Read<uint64_t>(mpBucketArray_startCount + 0x8);
+        node_mpNext = mem.Read<uint64_t>(mpBucketArray_startCount + 0x10);
     }
 
     uint64_t EncryptedPlayerMgr = node_second;
     return EncryptedPlayerMgr_GetPlayer(EncryptedPlayerMgr, NULL);
 
 }
-uint64_t GetSoldierWeapon(void)
+uint64_t GetSoldierWeapon(const Memory& mem)
 {
     DWORD64 pSoldierWeapon = 0x0;
 
     uint64_t pLocalPlayer = GetLocalPlayer();
     if (ValidPointer(pLocalPlayer)) {
-        uint64_t pLocalSoldier = rpm->read<uint64_t>(pLocalPlayer + 0x1D48);
+        uint64_t pLocalSoldier = mem.Read<uint64_t>(pLocalPlayer + 0x1D48);
         if (ValidPointer(pLocalSoldier)) {
           
-            uint64_t pClientWeaponComponent = rpm->read<uint64_t>(pLocalPlayer + 0x698);
+            uint64_t pClientWeaponComponent = mem.Read<uint64_t>(pLocalPlayer + 0x698);
                 if (ValidPointer(pClientWeaponComponent)) {
 
-                    uint64_t m_handler = rpm->read<uint64_t>(pClientWeaponComponent + 0x08A8);
-                    uint64_t m_activeSlot = rpm->read<uint64_t>(pClientWeaponComponent + 0x0A10);
+                    uint64_t m_handler = mem.Read<uint64_t>(pClientWeaponComponent + 0x08A8);
+                    uint64_t m_activeSlot = mem.Read<uint64_t>(pClientWeaponComponent + 0x0A10);
 
                     if (ValidPointer(m_handler))
                     {
-                        pSoldierWeapon = rpm->read<uint64_t>(m_handler + m_activeSlot * 0x8);
+                        pSoldierWeapon = mem.Read<uint64_t>(m_handler + m_activeSlot * 0x8);
                     }
                 }
             
