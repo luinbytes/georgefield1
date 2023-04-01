@@ -30,7 +30,7 @@ int main()
 			uint64_t HealthComponent = mem.Read<uint64_t>(clientSoldierEntity + 0x1D0);
 
 			//bonecollisioncomponent = clientSoldierEntity + 0x0490 
-			//if bonecollisioncomponent + 0x0038 == 1 then return
+			//if bonecollisioncomponent + 0x0038 == 0 then return
 			//ourQuatTransform = bonecollisioncomponent + 0x20 ??
 			//bonepos = mem.Read<vec3>(ourQuatTransform + bone_id * 0x20????);
 			//https://github.com/Zakaria-Master/BF1-ESP-AND-AIMBOT/blob/main/PZ-HAX/Frosbite.h#L305
