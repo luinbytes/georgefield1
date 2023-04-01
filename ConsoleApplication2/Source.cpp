@@ -29,6 +29,7 @@ int main()
 			uint64_t HealthComponent = mem.Read<uint64_t>(clientSoldierEntity + 0x1D0);
 
 			std::cout << mem.Read<float>(HealthComponent + 0x0020) << std::endl;
+			Sleep(1);
 		}
 	}
 
