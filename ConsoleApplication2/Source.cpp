@@ -18,8 +18,9 @@ int main()
 	while (!key_held(VK_END))
 	{
 		uintptr_t LocalPlayer = GetLocalPlayer(mem);
-		uintptr_t ClientPlayer = mem.Read<uintptr_t>(LocalPlayer + 0x0018);
-		//std::cout << mem.Read<char*>(ClientPlayer + 0x0018,24 or 8 idk);
+
+		//uintptr_t ClientPlayer = mem.Read<uintptr_t>(LocalPlayer + 0x0018);
+		//std::cout << mem.Read<char*>(ClientPlayer,24 or 8 idk);
 		//https://github.com/Zakaria-Master/BF1-ESP-AND-AIMBOT/blob/main/PZ-HAX/Frosbite.h#L473-L475
 		for (size_t i = 0; i < 100; i++)
 		{
@@ -28,9 +29,15 @@ int main()
 			uint64_t clientSoldierEntity = mem.Read<uint64_t>(Players + 0x1D48);
 			uint64_t HealthComponent = mem.Read<uint64_t>(clientSoldierEntity + 0x1D0);
 
-			std::cout << mem.Read<float>(HealthComponent + 0x0020) << std::endl;
-			Sleep(1);
+			//bonecollisioncomponent = clientSoldierEntity + 0x0490 
+			//if bonecollisioncomponent + 0x0038 == 1 then return
+			//ourQuatTransform = bonecollisioncomponent + 0x20 ??
+			//bonepos = mem.Read<vec3>(ourQuatTransform + bone_id * 0x20????);
+			//https://github.com/Zakaria-Master/BF1-ESP-AND-AIMBOT/blob/main/PZ-HAX/Frosbite.h#L305
+
+			std::cout << mem.Read<float>(HealthComponent + 0x0020) << std::endl;	
 		}
+		Sleep(1);
 	}
 
 	return 0;
