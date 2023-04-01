@@ -112,7 +112,7 @@ uint64_t GetLocalPlayer(const Memory& mem)
     }
 
     uint64_t EncryptedPlayerMgr = node_second;
-    return EncryptedPlayerMgr_GetPlayer(mem,EncryptedPlayerMgr, NULL);
+    return EncryptedPlayerMgr_GetPlayer(mem, EncryptedPlayerMgr, NULL);
 
 }
 uint64_t GetSoldierWeapon(const Memory& mem)
