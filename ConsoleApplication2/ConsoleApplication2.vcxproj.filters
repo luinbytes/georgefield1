@@ -19,5 +19,6 @@
     <ClInclude Include="Includes.h" />
     <ClInclude Include="Offsets.h" />
     <ClInclude Include="Memory.h" />
+    <ClInclude Include="Source.h" />
   </ItemGroup>
 </Project>

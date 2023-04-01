@@ -11,6 +11,9 @@ namespace Offsets
  DWORD clientVehicleEntity = 0x1D38;
  DWORD clientSoldierEntity = 0x1D48;
 
+ //ClientPlayerManager
+ DWORD ClientPlayerManager = 0x0068;
+
  //ClientVehicleEntity 
  DWORD Vehiclehealthcomponent = 0x1D0;
  DWORD EntityData = 0x30;
@@ -31,5 +34,10 @@ namespace Offsets
  //RenderView 
  DWORD viewMatrixInverse = 0x0320;
  DWORD viewProj = 0x0460;
+
+ //QuatTransform
+ DWORD validTransforms = 0x0038;
+
+
 
 }
