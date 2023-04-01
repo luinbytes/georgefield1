@@ -44,3 +44,4 @@
 
 .vs/
 output/
+*.ilk

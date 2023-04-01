@@ -60,7 +60,7 @@ uint64_t GetPlayerById(const Memory& mem, int id)
     }
 
     uint64_t EncryptedPlayerMgr = node_second;
-    return EncryptedPlayerMgr_GetPlayer(EncryptedPlayerMgr, id);
+    return EncryptedPlayerMgr_GetPlayer(mem, EncryptedPlayerMgr, id);
 }
 
 uint64_t GetLocalPlayer(const Memory& mem)
@@ -112,14 +112,14 @@ uint64_t GetLocalPlayer(const Memory& mem)
     }
 
     uint64_t EncryptedPlayerMgr = node_second;
-    return EncryptedPlayerMgr_GetPlayer(EncryptedPlayerMgr, NULL);
+    return EncryptedPlayerMgr_GetPlayer(mem,EncryptedPlayerMgr, NULL);
 
 }
 uint64_t GetSoldierWeapon(const Memory& mem)
 {
     DWORD64 pSoldierWeapon = 0x0;
 
-    uint64_t pLocalPlayer = GetLocalPlayer();
+    uint64_t pLocalPlayer = GetLocalPlayer(mem);
     if (ValidPointer(pLocalPlayer)) {
         uint64_t pLocalSoldier = mem.Read<uint64_t>(pLocalPlayer + 0x1D48);
         if (ValidPointer(pLocalSoldier)) {

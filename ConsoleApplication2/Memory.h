@@ -43,7 +43,10 @@ public:
 		if (processHandle)
 			::CloseHandle(processHandle);
 	}
-
+	bool is_valid()
+	{
+		return processHandle != nullptr;
+	}
 	const std::uintptr_t GetModuleAddress(const WCHAR* moduleName) const noexcept
 	{
 		::MODULEENTRY32 entry = { };
@@ -69,10 +72,10 @@ public:
 	}
 
 	template <typename T>
-	constexpr const T Read(const std::uintptr_t& address) const noexcept
+	constexpr const T Read(const std::uintptr_t& address,int size = sizeof(T)) const noexcept
 	{
 		T value = { };
-		::ReadProcessMemory(processHandle, reinterpret_cast<const void*>(address), &value, sizeof(T), NULL);
+		::ReadProcessMemory(processHandle, reinterpret_cast<const void*>(address), &value, size, NULL);
 		return value;
 	}
 
