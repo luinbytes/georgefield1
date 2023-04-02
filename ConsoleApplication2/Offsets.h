@@ -12,9 +12,6 @@ namespace Offsets
 	extern DWORD clientVehicleEntity;
 	extern DWORD clientSoldierEntity;
 
-	//ClientPlayerManager
-	extern DWORD ClientPlayerManager = 0x0068;
-
 	//ClientVehicleEntity 
 	extern DWORD Vehiclehealthcomponent;
 	extern DWORD EntityData;
@@ -35,9 +32,6 @@ namespace Offsets
 	//RenderView 
 	extern DWORD viewMatrixInverse;
 	extern DWORD viewProj;
-
-	//QuatTransform
-	extern DWORD validTransforms;
 }
 
 enum BoneIds {
