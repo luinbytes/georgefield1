@@ -31,5 +31,9 @@ namespace Offsets
  //RenderView 
  DWORD viewMatrixInverse = 0x0320;
  DWORD viewProj = 0x0460;
+ DWORD pQuat = 0x0010;
+
+ //BulletEntityData
+ DWORD gravity = 0x0140;
 
 }

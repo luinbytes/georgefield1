@@ -1,8 +1,16 @@
 #pragma once
 #include "Memory.h"
+#include "Source.h"
 #include "Obfuscationmgr.h"
 #include "Offsets.h"
 #include <memory>
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <format>
+#include <string>
+#include <algorithm>
+#include <d3dx9.h>
 
 struct vec3 {
 public:
@@ -53,4 +61,10 @@ public:
 	vec3 crossproduct(vec3 v2) const {
 		return { (y * v2.z) - (z * v2.y), -((x * v2.z) - (z * v2.x)), (x * v2.y) - (y * v2.x) };
 	}
+};
+
+struct vec4 {
+	float x, y, z, w;
+	vec4() = default;
+	vec4(float _x, float _y, float _z, float _w) : x(_x), y(_y), z(_z), w(_w) {}
 };

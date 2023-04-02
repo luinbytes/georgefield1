@@ -32,6 +32,8 @@ namespace Offsets
 	//RenderView 
 	extern DWORD viewMatrixInverse;
 	extern DWORD viewProj;
+
+	//extern DWORD pQuat;
 }
 
 enum BoneIds {
