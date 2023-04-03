@@ -1,4 +1,5 @@
 #include "Includes.h"
+#include <Windows.h>
 
 bool key_held(int key)
 {
@@ -41,15 +42,11 @@ bool get_bone(const Memory& mem, uintptr_t soldier, const int bone_id, vec3& out
     if (validtransform == 0)
         return false;
 
-    const auto pQuat = mem.Read<uintptr_t>(ragdoll + 0x0020);
+    const auto pQuat = mem.Read<uintptr_t>(ragdoll + 0x0028);
     if (!is_valid2(pQuat))
         return false;
 
-    const auto ballz = mem.Read<QuatTransform>(pQuat + bone_id * 0x0020);
-
-    out = vec3(ballz.m_TransAndScale);
-
-    //out = mem.Read<vec3>(pQuat + bone_id * 0x20);
+    out = mem.Read<vec3>(pQuat + bone_id * 0x20);
 
     return true;
 }
@@ -182,6 +179,14 @@ int main()
 
         vec3 bestheadpos(0, 0, 0);
         float closestfov = b::fov;
+        uint64_t LocalPlayer = GetLocalPlayer(mem);
+        if (!is_valid2(LocalPlayer))
+        {
+			b::log("LocalPlayer was invalid", eror);
+		}
+
+        auto LocalPlayerTeem = mem.Read<int>(LocalPlayer + Offsets::teamId);
+        //b::log(std::format("local : {}", LocalPlayerTeem));
 
 		//https://github.com/Zakaria-Master/BF1-ESP-AND-AIMBOT/blob/main/PZ-HAX/Frosbite.h#L473-L475
 		for (size_t i = 0; i < 100; i++)
@@ -196,30 +201,27 @@ int main()
             if (health < 1)
 				continue;
             
-            //const auto occluded = mem.Read<bool>(Players + Offsets::occluded);
-            //if (occluded)
-            //    continue;
+            const auto occluded = mem.Read<bool>(clientSoldierEntity + Offsets::occluded);
+            if (occluded)
+                continue;
+
+            auto PlayerTeem = mem.Read<int>(Players + Offsets::teamId);
+            b::log(std::format("player:    {}", PlayerTeem));
+
+            if (PlayerTeem != LocalPlayerTeem)
+				continue;
 
             vec3 bone(0, 0, 0);
             if (!get_bone(mem, clientSoldierEntity, 0x35, bone))
                 continue;
-                
-
-            vec3 Location = mem.Read<vec3>(clientSoldierEntity + 0x0990);
-            Location.x += bone.x;
-            Location.y += bone.y;
-            Location.z += bone.z;
-
-            //b::log(std::format("{}  {}  {}               |  {}", Location.x, Location.y, Location.z, i), eror);
 
             vec3 balls;
-            auto w2s = world_to_screen(mem, Location, balls);
+            auto w2s = world_to_screen(mem, bone, balls);
             if (!w2s || balls.x < 0 || balls.x > 1920 || balls.y < 0 || balls.y > 1080)
                 continue;
 
-            //b::log("BALLZ", eror);
             auto dist = dist_from_crosshair(balls);
-            //b::log(std::format("{}  {}", balls.x, balls.y), eror);
+            //b::log(std::format("dist from xhair:   {}  {}", balls.x, balls.y), eror);
             if (dist < closestfov)
             {
                 closestfov = dist;
@@ -227,11 +229,11 @@ int main()
             }
 
 		}
-        if (bestheadpos.x > 0 && bestheadpos.y > 0 && (key_held(VK_RBUTTON) && key_held(VK_LBUTTON) || key_held(VK_XBUTTON2))) {
+        if (bestheadpos.x > 0 && bestheadpos.y > 0 && (key_held(VK_RBUTTON) && key_held(VK_LBUTTON) || key_held(VK_XBUTTON2) || key_held(VK_LBUTTON))) {
             move_mouse(bestheadpos);
             b::log(std::to_string(bestheadpos.x), eror);
             b::log(std::to_string(bestheadpos.y), eror);
-            b::log("BANG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", eror);
+            b::log("-----------------------------------", eror);
         }
 
 		Sleep(1);
