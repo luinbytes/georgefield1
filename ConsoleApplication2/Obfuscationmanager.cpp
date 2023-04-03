@@ -68,19 +68,19 @@ uint64_t GetLocalPlayer(const Memory& mem)
     uint64_t pClientGameContext = mem.Read<uint64_t>(Offsets::ClientGameContext);
     if (!ValidPointer(pClientGameContext))
     {
-        return 0;
+        return 1;
     }
 
     uint64_t pPlayerManager = mem.Read<uint64_t>(pClientGameContext + 0x68);
     if (!ValidPointer(pPlayerManager))
     {
-        return 0;
+        return 1;
     }
 
     uint64_t pObfuscationMgr = mem.Read<uint64_t>(Offsets::ObfuscationMgr);
     if (!ValidPointer(pObfuscationMgr))
     {
-        return 0;
+        return 1;
     }
 
     uint64_t PlayerListXorValue = mem.Read<uint64_t>(pPlayerManager + 0xF8);

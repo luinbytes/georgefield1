@@ -1,4 +1,5 @@
 #include "Includes.h"
+
 bool key_held(int key)
 {
 	return (GetAsyncKeyState(key) & 0x8000);
@@ -23,6 +24,36 @@ void b::log(std::string tekst, log_ yes)
 	std::cout << "[+]" << tekst << '\n';
 }
 
+class QuatTransform
+{
+public:
+    D3DXVECTOR4 m_TransAndScale; //0x0000 
+    D3DXVECTOR4 m_Rotation; //0x0010 
+};//Size=0x0020
+
+bool get_bone(const Memory& mem, uintptr_t soldier, const int bone_id, vec3& out)
+{
+    const auto ragdoll = mem.Read<uintptr_t>(soldier + Offsets::bonecollisioncomponent);
+    if (!is_valid2(ragdoll))
+        return false;
+
+    const auto validtransform = mem.Read<unsigned char>(ragdoll + 0x0038);
+    if (validtransform == 0)
+        return false;
+
+    const auto pQuat = mem.Read<uintptr_t>(ragdoll + 0x0020);
+    if (!is_valid2(pQuat))
+        return false;
+
+    const auto ballz = mem.Read<QuatTransform>(pQuat + bone_id * 0x0020);
+
+    out = vec3(ballz.m_TransAndScale);
+
+    //out = mem.Read<vec3>(pQuat + bone_id * 0x20);
+
+    return true;
+}
+
 void move_mouse(vec3 target)
 {
 	INPUT Input = { 0 };
@@ -33,10 +64,19 @@ void move_mouse(vec3 target)
 	SendInput(1, &Input, sizeof(INPUT));
 }
 
-bool b::world_to_screen(const Memory& mem, const vec3& WorldPos, vec3& ScreenPos)
+float dist_from_crosshair(vec3 spot)
+{
+    auto x = abs(1920 / 2.0f - spot.x);
+    auto y = abs(1080 / 2.0f - spot.y);
+    return x > y ? x : y;
+}
+
+bool world_to_screen(const Memory& mem, const vec3& WorldPos, vec3& ScreenPos)
 {
     float cX = 1920 * 0.5f;
     float cY = 1080 * 0.5f;
+    auto view_x_projection = mem.Read<D3DXMATRIXA16>(Offsets::viewProj);
+    
 
     float w = b::view_x_projection(0, 3) * WorldPos.x + b::view_x_projection(1, 3) * WorldPos.y + b::view_x_projection(2, 3) * WorldPos.z + b::view_x_projection(3, 3);
 
@@ -48,6 +88,7 @@ bool b::world_to_screen(const Memory& mem, const vec3& WorldPos, vec3& ScreenPos
 
     float x = b::view_x_projection(0, 0) * WorldPos.x + b::view_x_projection(1, 0) * WorldPos.y + b::view_x_projection(2, 0) * WorldPos.z + b::view_x_projection(3, 0);
     float y = b::view_x_projection(0, 1) * WorldPos.x + b::view_x_projection(1, 1) * WorldPos.y + b::view_x_projection(2, 1) * WorldPos.z + b::view_x_projection(3, 1);
+
 
     ScreenPos.x = cX + cX * x / w;
     ScreenPos.y = cY - cY * y / w;
@@ -112,12 +153,11 @@ int main()
             b::log("player_mngr was invalid", eror);
         }
 
-        /*const auto playerlist = mem.Read<uintptr_t>(player_mngr + offsets.player);
-        if (!is_valid(playerlist))
-        {
-            b::log("playerlist was invalid", eror);
-            return;
-        }*/
+        //const auto playerlist = mem.Read<uintptr_t>(Offsets::clientSoldierEntity + 0x268);
+        //if (!is_valid2(playerlist))
+        //{
+        //    b::log("playerlist was invalid", eror);
+        //}
 
         static auto game_render = mem.Read<uintptr_t>(Offsets::GameRender);
         if (!is_valid2(game_render))
@@ -132,40 +172,68 @@ int main()
             b::log("renderview was invalid", eror);
         }
 
-        const auto LocalTeam = mem.Read<uintptr_t>(Offsets::teamId);
+        b::view_x_projection = mem.Read<D3DXMATRIXA16>(renderview + 0x0460);
 
-		uintptr_t LocalPlayer = GetLocalPlayer(mem);
-		uintptr_t ClientPlayer = mem.Read<uintptr_t>(LocalPlayer + 0x0018);
+		/*uintptr_t LocalPlayer = GetLocalPlayer(mem);
+        if (!is_valid2(LocalPlayer))
+        {
+			b::log("LocalPlayer was invalid", eror);
+		}*/
+
         vec3 bestheadpos(0, 0, 0);
         float closestfov = b::fov;
 
 		//https://github.com/Zakaria-Master/BF1-ESP-AND-AIMBOT/blob/main/PZ-HAX/Frosbite.h#L473-L475
 		for (size_t i = 0; i < 100; i++)
 		{
+
 			uint64_t Players = GetPlayerById(mem, i);
 
-			uint64_t clientSoldierEntity = mem.Read<uint64_t>(Players + 0x1D48);
-			uint64_t HealthComponent = mem.Read<uint64_t>(clientSoldierEntity + 0x1D0);
+            uint64_t clientSoldierEntity = mem.Read<uint64_t>(Players + Offsets::clientSoldierEntity);
+            uint64_t HealthComponent = mem.Read<uint64_t>(clientSoldierEntity + 0x01D0);
+
+            const auto health = mem.Read<float>(HealthComponent + 0x0020);
+            if (health < 1)
+				continue;
             
-            const auto occluded = mem.Read<uintptr_t>(clientSoldierEntity + Offsets::occluded);
-            if (occluded)
+            //const auto occluded = mem.Read<bool>(Players + Offsets::occluded);
+            //if (occluded)
+            //    continue;
+
+            vec3 bone(0, 0, 0);
+            if (!get_bone(mem, clientSoldierEntity, 0x35, bone))
+                continue;
+                
+
+            vec3 Location = mem.Read<vec3>(clientSoldierEntity + 0x0990);
+            Location.x += bone.x;
+            Location.y += bone.y;
+            Location.z += bone.z;
+
+            //b::log(std::format("{}  {}  {}               |  {}", Location.x, Location.y, Location.z, i), eror);
+
+            vec3 balls;
+            auto w2s = world_to_screen(mem, Location, balls);
+            if (!w2s || balls.x < 0 || balls.x > 1920 || balls.y < 0 || balls.y > 1080)
                 continue;
 
-            std::vector<int> bones;
-
-            switch (b::aimprority)
+            //b::log("BALLZ", eror);
+            auto dist = dist_from_crosshair(balls);
+            //b::log(std::format("{}  {}", balls.x, balls.y), eror);
+            if (dist < closestfov)
             {
-            case 1:
-                bones = { BONE_Head };
-                break;
-            case 2:
-                bones = { BONE_Head, BONE_Spine, BONE_SPINE1 };
-                break;
-            case 3:
-                bones = { BONE_Head, BONE_Spine, BONE_SPINE1, BONE_SPINE2 };
-                break;
+                closestfov = dist;
+                bestheadpos = balls;
             }
+
 		}
+        if (bestheadpos.x > 0 && bestheadpos.y > 0 && (key_held(VK_RBUTTON) && key_held(VK_LBUTTON) || key_held(VK_XBUTTON2))) {
+            move_mouse(bestheadpos);
+            b::log(std::to_string(bestheadpos.x), eror);
+            b::log(std::to_string(bestheadpos.y), eror);
+            b::log("BANG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", eror);
+        }
+
 		Sleep(1);
 	}
 

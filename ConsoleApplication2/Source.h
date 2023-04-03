@@ -13,12 +13,11 @@ namespace b
 {
 	void init();
 	void moveing(const Memory& mem);
-	bool world_to_screen(const Memory& mem, const vec3& WorldPos, vec3& ScreenPos);
+	//bool world_to_screen(const Memory& mem, const vec3& WorldPos, vec3& ScreenPos);
 	void log(std::string tekst, log_ yes = log_::info);
 	void handle_menu();
 	inline bool unload;
 	inline HANDLE console;
-
 	inline float smooth = 2.2f;
 	inline float fov = 80.0f;
 	inline int sensitivity = 10;
@@ -33,4 +32,5 @@ namespace b
 	{
 		return (GetAsyncKeyState(key) & 0x8000);
 	}
+
 }
