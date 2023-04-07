@@ -32,6 +32,57 @@ public:
     D3DXVECTOR4 m_Rotation; //0x0010 
 };//Size=0x0020
 
+
+//Mouse class for new aim method (TEST)
+class Mouse
+{
+public:
+
+    class MouseDevice
+    {
+    public:
+
+        class MouseState
+        {
+        public:
+            long x; //0x0000
+            long y; //0x0004
+            long z; //0x0008
+            unsigned char buttons[0x8]; //0x000C
+        };
+
+        virtual void Function0(); // 0x0000
+        virtual void Read(float SampleTime, bool VisualFrame); //0x0008 
+        virtual const char* Name(void); //0x0010 
+        virtual const char* Name(unsigned int); // 0x0018 
+        virtual unsigned int ControlCount(); // 0x0020 
+        virtual bool IsConnected(); // 0x0028
+        virtual bool IsAnalogue(unsigned int); // 0x0030
+        virtual float GetValue(unsigned int);	// 0x0038
+
+        char _0x0008[144];
+        __int64 m_HWND; //0x0098 
+        __int64 m_pWindowProcedure; //0x00A0 
+        char _0x00A8[40];
+        BYTE m_CursorMode; //0x00D0 
+        BYTE m_UIOwnsInput; //0x00D1 
+        BYTE m_ShowCursor; //0x00D2 
+        BYTE m_CursorConfined; //0x00D3 
+        BYTE m_HasOverflowed; //0x00D4 
+        BYTE m_UseRawMouseInput; //0x00D5 
+        BYTE m_WindowActive; //0x00D6 
+        char _0x00D7[25];
+        MouseState m_Current; //0x00F0
+        MouseState m_Buffer; //0x0104
+        char _0x0118[24];
+
+    }; //Size = 0x0130
+
+    char _0x0000[16];
+    MouseDevice* m_pDevice; // 0x0010
+
+}; //Size = 0x0100
+
 bool get_bone(const Memory& mem, uintptr_t soldier, const int bone_id, vec3& out)
 {
     const auto ragdoll = mem.Read<uintptr_t>(soldier + Offsets::bonecollisioncomponent);
@@ -201,27 +252,31 @@ int main()
             if (health < 1)
 				continue;
             
-            const auto occluded = mem.Read<bool>(clientSoldierEntity + Offsets::occluded);
-            if (occluded)
-                continue;
+            //const auto occluded = mem.Read<bool>(clientSoldierEntity + Offsets::occluded);
+            //if (occluded)
+            //    continue;
 
             auto PlayerTeem = mem.Read<int>(Players + Offsets::teamId);
-            b::log(std::format("player:    {}", PlayerTeem));
 
-            if (PlayerTeem != LocalPlayerTeem)
+            if (PlayerTeem == LocalPlayerTeem)
 				continue;
+            //b::log(std::format("player:    {}", PlayerTeem));
+            //b::log(std::format("local:    {}", LocalPlayerTeem));
 
             vec3 bone(0, 0, 0);
             if (!get_bone(mem, clientSoldierEntity, 0x35, bone))
                 continue;
 
+            //auto beenz = mem.Read<vec3>(clientSoldierEntity + 0x0990); //location
+
             vec3 balls;
             auto w2s = world_to_screen(mem, bone, balls);
             if (!w2s || balls.x < 0 || balls.x > 1920 || balls.y < 0 || balls.y > 1080)
                 continue;
+            //b::log(std::format("{} {}  {}", balls.x, balls.y, i), eror);
 
             auto dist = dist_from_crosshair(balls);
-            //b::log(std::format("dist from xhair:   {}  {}", balls.x, balls.y), eror);
+            //b::log(std::format("dist from xhair:   {}  {}", dist, i), eror);
             if (dist < closestfov)
             {
                 closestfov = dist;
@@ -229,10 +284,13 @@ int main()
             }
 
 		}
-        if (bestheadpos.x > 0 && bestheadpos.y > 0 && (key_held(VK_RBUTTON) && key_held(VK_LBUTTON) || key_held(VK_XBUTTON2) || key_held(VK_LBUTTON))) {
+        if (bestheadpos.x > 0 && bestheadpos.y > 0 && (key_held(VK_RBUTTON) && key_held(VK_LBUTTON) || key_held(VK_XBUTTON2))) {
             move_mouse(bestheadpos);
-            b::log(std::to_string(bestheadpos.x), eror);
-            b::log(std::to_string(bestheadpos.y), eror);
+            b::log("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", eror);
+            b::log(std::format("HeadPosX : {}", bestheadpos.x), eror);
+            b::log(std::format("HeadPosY : {}", bestheadpos.y), eror);
+            b::log(" ", eror);
+            b::log(std::format("ClosestFov : {}", closestfov), eror);
             b::log("-----------------------------------", eror);
         }
 
