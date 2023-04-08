@@ -28,6 +28,7 @@ public:
 				processHandle = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, processId);
 				break;
 			}
+			
 		}
 
 		if (snapShot)
@@ -43,9 +44,9 @@ public:
 		if (processHandle)
 			::CloseHandle(processHandle);
 	}
-	bool is_valid()
+	const bool Valid() const noexcept
 	{
-		return processHandle != nullptr;
+		return !!processId;
 	}
 	const std::uintptr_t GetModuleAddress(const WCHAR* moduleName) const noexcept
 	{
@@ -58,7 +59,7 @@ public:
 
 		while (::Module32Next(snapShot, &entry))
 		{
-			if (!wcscmp(moduleName, entry.szModule))
+			if (!wcscmp(moduleName,entry.szModule))
 			{
 				result = reinterpret_cast<std::uintptr_t>(entry.modBaseAddr);
 				break;
@@ -72,7 +73,7 @@ public:
 	}
 
 	template <typename T>
-	constexpr const T Read(const std::uintptr_t& address,int size = sizeof(T)) const noexcept
+	constexpr const T Read(const std::uintptr_t& address,SIZE_T size = sizeof(T)) const noexcept
 	{
 		T value = { };
 		::ReadProcessMemory(processHandle, reinterpret_cast<const void*>(address), &value, size, NULL);
@@ -80,8 +81,8 @@ public:
 	}
 
 	template <typename T>
-	constexpr void Write(const std::uintptr_t& address, const T& value) const noexcept
+	constexpr void Write(const std::uintptr_t& address, const T& value, SIZE_T size = sizeof(T)) const noexcept
 	{
-		::WriteProcessMemory(processHandle, reinterpret_cast<void*>(address), &value, sizeof(T), NULL);
+		::WriteProcessMemory(processHandle, reinterpret_cast<void*>(address), &value, size, NULL);
 	}
 };
