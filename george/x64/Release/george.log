@@ -1,0 +1,15 @@
+﻿  george.cpp
+C:\Users\crims\Documents\Cheetos\Battlefield\georgefield1 src\georgefield1\george\george\memory.h(28,62): warning C4244: 'argument': conversion from 'uintptr_t' to 'DWORD', possible loss of data
+C:\Users\crims\Documents\Cheetos\Battlefield\georgefield1 src\georgefield1\george\george\memory.h(56,71): warning C4244: 'argument': conversion from 'const uintptr_t' to 'DWORD', possible loss of data
+  cock.cpp
+C:\Users\crims\Documents\Cheetos\Battlefield\georgefield1 src\georgefield1\george\george\memory.h(28,62): warning C4244: 'argument': conversion from 'uintptr_t' to 'DWORD', possible loss of data
+C:\Users\crims\Documents\Cheetos\Battlefield\georgefield1 src\georgefield1\george\george\memory.h(56,71): warning C4244: 'argument': conversion from 'const uintptr_t' to 'DWORD', possible loss of data
+C:\Users\crims\Documents\Cheetos\Battlefield\georgefield1 src\georgefield1\george\george\cock.cpp(41,16): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\crims\Documents\Cheetos\Battlefield\georgefield1 src\georgefield1\george\george\cock.cpp(44,16): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\crims\Documents\Cheetos\Battlefield\georgefield1 src\georgefield1\george\george\cock.cpp(224,50): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\crims\Documents\Cheetos\Battlefield\georgefield1 src\georgefield1\george\george\cock.cpp(310,73): warning C4305: 'argument': truncation from 'double' to 'float'
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 987 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  george.vcxproj -> C:\Users\crims\Documents\Cheetos\Battlefield\georgefield1 src\georgefield1\x64\Release\georgefield4.exe

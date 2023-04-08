@@ -2,7 +2,7 @@
 
 void b::init() {
 	console = GetStdHandle(STD_OUTPUT_HANDLE);
-	log("initialiezing!!!!", info);
+	log("Initializing georgefield1!", info);
 
 	auto george = Memory(process_name);
     bool once = false;
@@ -11,7 +11,7 @@ void b::init() {
     { 
         if (!once)
         {
-            log("could not find process, retrying..", eror);
+            log("Could not find process, retrying...", eror);
             once = true;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -20,12 +20,18 @@ void b::init() {
 
 	std::thread(aimbob,george).detach();
 	std::thread(handle_menu).detach();
-    log("dONE!", gude);
+    log("george now owns your battlefield exe!!", gude);
 
 	while (!key_held(VK_END))
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(200));
 	}
+}
+
+//Funny std::clamp doesnt work so all the homies now use clomp.
+template<typename T>
+constexpr const T& clomp(const T& value, const T& low, const T& high) {
+    return value < low ? low : (high < value ? high : value);
 }
 
 void move_mouse(vec3 target) {
@@ -132,7 +138,7 @@ uintptr_t read_and_validate_memory_address(const Memory& mem,const uintptr_t add
 }
 
 void b::aimbob(const Memory& mem) {
-    log("ajmbob thread started!", gude);
+    log("aimbob thread started!", gude);
     const auto gamecontext = mem.Read<uintptr_t>(offsets.game_context);
     if (!is_valid(gamecontext))
         return;
@@ -157,7 +163,8 @@ void b::aimbob(const Memory& mem) {
     if (!is_valid(renderview))
         return;
 
-    width = 1920; //reading every time cuz maybe resolution changed?
+    //Hard code or no code.
+    width = 1920;
     height = 1080;
 
     cw = width / 2;
@@ -184,11 +191,11 @@ void b::aimbob(const Memory& mem) {
 			continue;
 
         view_x_projection = mem.Read<D3DXMATRIXA16>(renderview + 0x0460);
-        //view_inverse = mem.Read<D3DXMATRIXA16>(renderview + 0x2E0);
 
-        //const auto local_pos = (vec3)&view_inverse._41;
-
-       /* 
+       /*
+       * 
+       * Needs reversing smh.
+       * 
         const auto pos_ptr = mem.Read<uintptr_t>(localsoldier + offsets.position);
         if (!is_valid(pos_ptr))
             continue;
@@ -232,6 +239,9 @@ void b::aimbob(const Memory& mem) {
             if (health <= 0)
                 continue;
           /*  
+          * 
+          * Probably not needed but I shall keep anyways.
+          * 
             mem.Write<BYTE>(soldier + 0x1A, 159); // updates bone visibility something?
             const auto occluded = mem.Read<bool>(soldier + 0x6EB);
             if (occluded)
@@ -276,12 +286,15 @@ void b::aimbob(const Memory& mem) {
             for (int g = 0; g < bones.size(); g++)
             {  
                 vec3 bone = mem.Read<vec3>(pQuat + bones[g] * 0x20);
-                //bone = chatbot_predict(local_pos, bone, velocity, local_velocity, bullet_speed, bullet_gravity);
+
+                /*
+                * 
+                * No velocity, will reverse once im smart.
+                * 
+                bone = chatbot_predict(local_pos, bone, velocity, local_velocity, bullet_speed, bullet_gravity);*/
+                
                 vec3 balls;
                 auto w2s = world_to_screen(mem, bone, balls);
-                //log(std::format("w2s: {}", w2s));
-                //log(std::format("in: {} {} {}", bone.x, bone.y, bone.z));
-                //log(std::format("out: {} {} {}", balls.x, balls.y, balls.z));
 
                 if (!w2s || balls.x < 0 || balls.x > b::width || balls.y < 0 || balls.y > b::height)
                     continue;
@@ -308,9 +321,7 @@ void b::aimbob(const Memory& mem) {
             vec3 center_circle = (bestheadpos + below) / 2.0f;
 
             float distance = vec3(center_circle.x - cw, center_circle.y - ch, 0).length() / 2.f;
-            //log(std::format("{:.2f}radius, {:.2f}dist",radius, distance));
             if (distance <= radius) {
-                //log("pew");
                 click();
             }
         }
@@ -359,9 +370,9 @@ void b::handle_menu() {
             delayer = 0;
         }
 
-        SetConsoleTitleA(std::format("{} fov {:.1f}, smoothing {:.1f}, hb: {}, hvh: {}  :)", grogtext, b::fov, b::smooth, aimtypes[b::aimprority], b::nospreadnorekoil).data());
-        b::fov = std::clamp(b::fov, 1.f, 300.f);
-        b::smooth = std::clamp(b::smooth, 1.f, 20.f);
+        SetConsoleTitleA(std::format("{} fov {:.1f}, smoothing {:.1f}, bone: {} :)", grogtext, b::fov, b::smooth, aimtypes[b::aimprority]).data());
+        b::fov = clomp(b::fov, 1.f, 300.f);
+        b::smooth = clomp(b::smooth, 1.f, 20.f);
                
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
